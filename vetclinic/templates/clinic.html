@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+{% block content %}
+    <h1>
+    {% if tab == 'journal' %}
+        Журнал записей
+    {% elif tab == 'schedule' %}
+        Расписание врачей
+    {% elif tab == 'owners' %}
+        Владельцы и питомцы
+    {% else %}
+        Справочники
+    {% endif %}
+    </h1>
+    <p class="subtitle"> Управление приёмами, владельцами, питомцами и расписанием врачей. </p>
+    {% if tab == 'journal' %}
+        <div class="stats">
+            <div class="card">
+                <b> {{ appointments|length }} </b>
+                <p> Записи </p>
+            </div>
+            <div class="card">
+                <b> {{ waiting_count }} </b>
+                <p> Ожидает подтверждения </p>
+            </div>
+            <div class="card">
+                <b> {{ confirmed_count }} </b>
+                <p> Подтверждённая запись </p>
+            </div>
+            <div class="card">
+                <b class="redtext"> {{ overdue_count }} </b>
+                <p> Питомец с просрочкой </p>
+            </div>
+        </div>
+        <section class="card">
+            <div class="split">
+                <h2> Журнал записей </h2>
+                <a class="btn" href="{% url 'book' %}"> + Новая запись </a>
+            </div>
+            <form method="get" class="filters">
+                <select name="doctor" onchange="this.form.submit()"> <option value=""> Все врачи </option>
+                {% for d in doctors %}
+                    <option value="{{ d.pk }}" {% if doctor_id == d.pk|stringformat:'s' %}selected{% endif %}> {{ d }} </option>
+                {% endfor %}
+                </select>
+            </form>
+            <table>
+                <thead>
+                    <tr>
+                        <th>
+                            Дата и время
+                        </th>
+                        <th>
+                            Питомец / вид
+                        </th>
+                        <th>
+                            Владелец / телефон
+                        </th>
+                        <th>
+                            Услуга
+                        </th>
+                        <th>
+                            Врач
+                        </th>
+                        <th>
+                            Статус
+                        </th>
+                        <th>
+                            Действие
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for a in appointments %}
+                        <tr class="{% if a.pet.overdue %}danger{% endif %}">
+                            <td>
+                                {{ a.date|date:'d.m.Y' }} <br> {{ a.time|time:'H:i' }}
+                            </td>
+                            <td>
+                                <b> {{ a.pet }} · {{ a.pet.species }} </b>
+                                <small>
+                                {% if a.pet.overdue %}
+                                    Просрочка {{ a.pet.overdue.first.overdue_days }} дней
+                                {% endif %}
+                                </small>
+                            </td>
+                            <td>
+                                {{ a.pet.owner }} <small> {{ a.pet.owner.phone }} </small>
+                            </td>
+                            <td>
+                                {{ a.service }}
+                            </td>
+                            <td>
+                                {{ a.doctor }}
+                            </td>
+                            <td>
+                                {{ a.status }}
+                            </td>
+                            <td>
+                                <a class="tab" href="{% url 'appointment_detail' a.pk %}"> Открыть </a>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="7">
+                                Записей нет.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+    {% elif tab == 'owners' %}
+        <section class="card">
+            <h2> Владельцы и питомцы </h2>
+            {% for owner in owners %}
+                <h3> {{ owner }} · {{ owner.phone }} </h3>
+                {% for pet in owner.pet_set.all %}
+                    <p> <a href="{% url 'pet_detail' pet.pk %}"> {{ pet.name }} · {{ pet.species }} · {{ pet.age }} </a> </p>
+                {% endfor %}
+            {% endfor %}
+        </section>
+    {% elif tab == 'schedule' %}
+        <section class="card">
+            <h2> Расписание врачей </h2>
+            {% for doctor in doctors %}
+                <h3> {{ doctor }} · {{ doctor.specialty }} </h3>
+                <p> Кабинет {{ doctor.room }} </p>
+                {% for a in appointments %}
+                    {% if a.doctor.pk == doctor.pk %}
+                        <p> {{ a.date|date:'d.m.Y' }} · {{ a.time|time:'H:i' }} · {{ a.pet }} · {{ a.status }} · <a href="{% url 'appointment_detail' a.pk %}"> Открыть </a> </p>
+                    {% endif %}
+                {% endfor %}
+            {% endfor %}
+        </section>
+    {% else %}
+        <div class="layout">
+            <section class="card">
+                <h2> Виды животных и вакцины </h2>
+                {% for item in species %}
+                    <p> {{ item }} </p>
+                {% endfor %}
+                <h3> Вакцины </h3>
+                {% for item in vaccines %}
+                    <p> {{ item.name }} · {{ item.disease }} </p>
+                {% endfor %}
+                <h3> График прививок </h3>
+                {% for item in schemes %}
+                    <p> {{ item.species }} · {{ item.label }} · через {{ item.age_days }} дней от рождения </p>
+                {% endfor %}
+            </section>
+            <aside class="card">
+                <h2> Добавить данные </h2>
+                <form method="post">
+                    {% csrf_token %} <input type="hidden" name="action" value="species">
+                    <label> Новый вид <input name="name" required> </label>
+                    <button class="btn full"> Добавить вид </button>
+                </form>
+                <form method="post">
+                    {% csrf_token %} <input type="hidden" name="action" value="vaccine">
+                    <label> Вакцина <input name="name" required> </label>
+                    <label> Заболевание <input name="disease" required> </label>
+                    <button class="btn full"> Добавить вакцину </button>
+                </form>
+                <form method="post">
+                    {% csrf_token %} <input type="hidden" name="action" value="doctor">
+                    <label> ФИО врача <input name="name" required> </label>
+                    <label> Специализация <input name="specialty" required> </label>
+                    <label> Кабинет <input name="room" value="4"> </label>
+                    <button class="btn full"> Добавить врача </button>
+                </form>
+                <form method="post">
+                    {% csrf_token %} <input type="hidden" name="action" value="scheme">
+                    <label> Вид <select name="species">
+                    {% for item in species %}
+                        <option value="{{ item.pk }}"> {{ item }} </option>
+                    {% endfor %}
+                    </select> </label>
+                    <label> Вакцина <select name="vaccine">
+                    {% for item in vaccines %}
+                        <option value="{{ item.pk }}"> {{ item }} </option>
+                    {% endfor %}
+                    </select> </label>
+                    <label> Возраст в днях <input type="number" name="age_days" min="0" required> </label>
+                    <label> Название дозы <input name="label" required> </label>
+                    <button class="btn full"> Добавить правило </button>
+                </form>
+            </aside>
+        </div>
+    {% endif %}
+{% endblock %}

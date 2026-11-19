@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block content %}
+    <h1>Ветеринарные врачи</h1>
+    <p class="subtitle">Выберите специалиста и запишитесь на удобное время.</p>
+    <section class="cards2 doctor-list">
+        {% for doctor in doctors %}
+            <article class="card doctor-card">
+                <strong class="blue">{{ doctor.specialty|capfirst }}</strong>
+                <h2>{{ doctor.name }}</h2>
+                <p>{% if 'хирург' in doctor.specialty|lower %}Хирургическое лечение, вакцинация и наблюдение после операций.{% else %}Профилактические осмотры, вакцинация и сопровождение лечения.{% endif %}</p>
+                <p>Кабинет {{ doctor.room }}</p>
+                <a class="btn full" href="{% url 'book' %}">Записаться к врачу</a>
+            </article>
+        {% endfor %}
+    </section>
+    <section class="card info doctor-help">
+        <h2>Не знаете, к кому записаться?</h2>
+        <p>При первом обращении начните с терапевта. Врач проведёт осмотр и при необходимости направит к профильному специалисту.</p>
+        <strong class="blue">Запись по телефону: +7 (495) 123-45-67 · ежедневно 08:00-21:00</strong>
+    </section>
+    <section class="card">
+        <h2>Все рекомендации - в личном кабинете</h2>
+        <p>После приёма назначения и диагнозы сохраняются в истории лечения вашего питомца.</p>
+    </section>
+{% endblock %}

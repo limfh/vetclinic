@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block content %}
+    <h1> Календарь прививок </h1>
+    <p class="subtitle"> Индивидуальный график по виду животного и возрасту. </p>
+    {% if pet %}
+        <div class="layout">
+            <div>
+                <form method="get">
+                    <label> Питомец <select name="pet" onchange="this.form.submit()">
+                    {% for p in pets %}
+                        <option value="{{ p.pk }}" {% if p.pk == pet.pk %}selected{% endif %}> {{ p.name }} · {{ p.species }} </option>
+                    {% endfor %}
+                    </select> </label>
+                </form>
+                {% include 'schedule.html' %}
+                <div class="card">
+                    <h3> Параметры графика · {{ pet.name }} </h3>
+                    <div class="cards3">
+                        <p> Вид животного <br> <b> {{ pet.species }} </b> </p>
+                        <p> Дата рождения <br> <b> {{ pet.birth_date|date:'d.m.Y' }} </b> </p>
+                        <p> Расчётный возраст <br> <b> {{ pet.age }} </b> </p>
+                    </div>
+                    <form method="post">
+                        {% csrf_token %} <button class="btn"> Сформировать график </button>
+                    </form>
+                </div>
+            </div>
+            <aside class="card info">
+                <h3> Как обновляется график </h3>
+                <p> 01 &nbsp; По виду и возрасту выбираются прививки. </p>
+                <p> 02 &nbsp; Невыполненные прививки с прошедшей датой выделяются как просроченные. </p>
+                <p> 03 &nbsp; Они автоматически появляются в напоминаниях владельца. </p>
+            </aside>
+        </div>
+    {% else %}
+        <div class="card">
+            Питомцев пока нет.
+        </div>
+    {% endif %}
+{% endblock %}

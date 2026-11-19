@@ -1,0 +1,55 @@
+<div class="card bordered">
+    <div class="split">
+        <div>
+            <h3> Календарь прививок </h3>
+            <p> График формируется по виду животного и возрасту питомца. </p>
+        </div>
+        <span class="badge info"> Автоматический график </span>
+    </div>
+    <div class="info strip">
+        Вид: {{ pet.species }} <span> Возраст: {{ pet.age }} </span>
+        <span> На основе даты рождения </span>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>
+                    Вакцина / заболевание
+                </th>
+                <th>
+                    Плановая дата
+                </th>
+                <th>
+                    Статус
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for shot in shots %}
+                <tr class="{% if shot.overdue_days %}danger{% endif %}">
+                    <td>
+                        {{ shot.scheme.label }}
+                    </td>
+                    <td>
+                        {{ shot.due_date|date:'d.m.Y' }}
+                    </td>
+                    <td>
+                        {% if shot.done_date %}
+                            <span class="badge good"> Выполнена </span>
+                        {% elif shot.overdue_days %}
+                            <span class="badge danger"> Просрочено · {{ shot.overdue_days }} дн. </span>
+                        {% else %}
+                            <span class="badge muted"> Запланирована </span>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="3">
+                        Для этого вида пока нет правил вакцинации.
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

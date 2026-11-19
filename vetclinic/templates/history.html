@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% block content %}
+    <h1> История лечения </h1>
+    <p class="subtitle"> Приёмы, диагнозы и назначения ветеринарных врачей. </p>
+    <div class="filters">
+        <form method="get">
+            <select name="pet"> <option value=""> Все питомцы </option>
+            {% for p in pets %}
+                <option value="{{ p.pk }}" {% if pet_id == p.pk|stringformat:'s' %}selected{% endif %}> {{ p }} · {{ p.species }} </option>
+            {% endfor %}
+            </select>
+            <select name="year"> <option value=""> Все годы </option>
+            {% for y in years %}
+                <option value="{{ y }}" {% if year == y|stringformat:'s' %}selected{% endif %}> {{ y }} </option>
+            {% endfor %}
+            </select>
+            <button class="btn"> Показать </button>
+        </form>
+    </div>
+    <div class="layout">
+        <div>
+            <section class="card bordered">
+                <h2> История лечения </h2>
+                <p> Последние приёмы </p>
+                {% for visit in visits %}
+                    <a class="visit" href="?pet={{ pet_id }}&year={{ year }}&appointment={{ visit.pk }}"> <b> {{ visit.date|date:'d F Y' }} · Приём № {{ visit.pk }} </b> <span> {{ visit.pet }} · {{ visit.doctor }} · {{ visit.doctor.specialty }} </span> <strong> Диагноз: {{ visit.diagnosis.text|default:'не указан' }} </strong> <span> Назначения:
+                    {% for tr in visit.treatments.all %}
+                        {{ tr.text }}
+                    {% empty %}
+                        нет
+                    {% endfor %}
+                    </span> </a>
+                {% empty %}
+                    <p> Завершённых приёмов пока нет. </p>
+                {% endfor %}
+            </section>
+            <div class="card">
+                <h3> Выполненные прививки </h3>
+                {% for shot in completed_shots %}
+                    <p> {{ shot.done_date|date:'d.m.Y' }} · {{ shot.pet }} · {{ shot.scheme.label }} · серия {{ shot.batch }} </p>
+                {% empty %}
+                    <p> Прививок пока нет. </p>
+                {% endfor %}
+            </div>
+        </div>
+        <aside class="card">
+            {% if selected %}
+                <h2> Приём № {{ selected.pk }} </h2>
+                <p> {{ selected.date|date:'d F Y' }} </p>
+                <small class="blue"> ЛЕЧАЩИЙ ВРАЧ </small>
+                <h3> {{ selected.doctor }} </h3>
+                <small class="blue"> ДИАГНОЗ </small>
+                <h3> {{ selected.diagnosis.text|default:'не указан' }} </h3>
+                <small class="blue"> НАЗНАЧЕНИЯ </small>
+                {% for tr in selected.treatments.all %}
+                    <p> {{ tr.text }} </p>
+                {% endfor %}
+                <span class="badge good"> Лечение завершено </span>
+            {% else %}
+                <h2> Выберите приём </h2>
+            {% endif %}
+        </aside>
+    </div>
+{% endblock %}

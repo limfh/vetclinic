@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block content %}
+    <h1> Карточка питомца · {{ pet.name }} </h1>
+    <p class="subtitle"> Данные питомца, персональный график вакцинации и медицинская история. </p>
+    <div class="layout">
+        <div>
+            <section class="card bordered">
+                <div class="tabs">
+                    {% for item in pets %}
+                        <a class="tab {% if item.pk == pet.pk %}info{% endif %}" href="{% url 'pet_detail' item.pk %}"> {{ item.name }} · {{ item.species }} </a>
+                    {% endfor %}
+                    <a class="tab" href="{% url 'pets' %}"> + Добавить питомца </a>
+                </div>
+                <h2> {{ pet.name }} </h2>
+                <p> {{ pet.breed }} · {{ pet.sex }} </p>
+                <b> {{ pet.species }} · {{ pet.age }} · {{ pet.birth_date|date:'d.m.Y' }} </b>
+                <p class="small"> Чип {{ pet.chip }} · Паспорт {{ pet.passport }} </p>
+                {% if role == 'owner' and pet.owner.user_id == user.id %}
+                    <form method="post" action="{% url 'delete_pet' pet.pk %}" onsubmit="return confirm('Удалить питомца и все его прививки, записи и историю лечения? Это действие нельзя отменить.');">
+                        {% csrf_token %}
+                        <button class="btn red" type="submit">Удалить питомца</button>
+                    </form>
+                {% endif %}
+                {% for shot in pet.overdue %}
+                    <div class="danger badge">
+                        {{ shot.scheme.vaccine.disease }} - просрочено {{ shot.overdue_days }} дн.
+                    </div>
+                {% endfor %}
+            </section>
+            {% include 'schedule.html' %}
+        </div>
+        <aside>
+            <div class="card bordered">
+                <h3> Напоминания </h3>
+                {% for shot in pet.overdue %}
+                    <div class="danger alert">
+                        <b> ! {{ pet.name }} · {{ shot.scheme.vaccine.disease }} </b>
+                        <p> Срок {{ shot.due_date|date:'d.m.Y' }} · просрочено {{ shot.overdue_days }} дн. </p>
+                        <a class="btn red" href="{% url 'book' %}"> Записаться на прививку </a>
+                    </div>
+                {% empty %}
+                    <p> Просроченных прививок нет. </p>
+                {% endfor %}
+            </div>
+            <div class="card">
+                <h3> Владелец и врач </h3>
+                <b> {{ pet.owner }} </b>
+                <p> {{ pet.owner.phone }} </p>
+            </div>
+        </aside>
+    </div>
+    <section class="card split">
+        <div>
+            <h3> Последний приём </h3>
+            {% for appt in appointments %}
+                <p> {{ appt.date|date:'d.m.Y' }} · {{ appt.service }} · {{ appt.doctor }} </p>
+            {% empty %}
+                <p> Приёмов пока нет. </p>
+            {% endfor %}
+        </div>
+        <a class="btn" href="{% url 'history' %}?pet={{ pet.pk }}"> История лечения → </a>
+    </section>
+{% endblock %}

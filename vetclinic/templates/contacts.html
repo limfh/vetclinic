@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block content %}
+    <h1>Контакты</h1>
+    <p class="subtitle">Свяжитесь с нами или запишитесь на приём онлайн.</p>
+    <section class="layout contact-top">
+        <article class="card">
+            <h2>Мы на связи</h2>
+            <strong class="phone">+7 (495) 123-45-67</strong>
+            <p>Запись на приём и вопросы о работе клиники.</p>
+            <p>Режим работы</p>
+            <h2>Ежедневно 08:00-21:00</h2>
+            <a class="btn full" href="{% url 'book' %}">Записаться на приём</a>
+        </article>
+        <article class="card info">
+            <h2>Ждём вас в ВетЗаботе</h2>
+            <h2>Москва, ул. Ветеринарная, 12</h2>
+            <strong class="blue">Перед визитом</strong>
+            <p>Проверьте дату и время записи в личном кабинете. Возьмите ветеринарный паспорт питомца и предыдущие медицинские заключения.</p>
+            <p>Если планы изменились, сообщите об этом по телефону клиники.</p>
+        </article>
+    </section>
+    <section class="card contact-bottom">
+        <h2>Забота продолжается и после визита</h2>
+        <p>В личном кабинете доступны карточки питомцев, история лечения, график вакцинации и напоминания о предстоящих приёмах.</p>
+        {% if user.is_authenticated %}
+            <a href="{% url 'pets' %}">Карточки питомцев</a> · <a href="{% url 'vaccinations' %}">Прививки</a> · <a href="{% url 'reminders' %}">Напоминания</a> · <a href="{% url 'history' %}">История лечения</a>
+        {% else %}
+            <a href="{% url 'login' %}">Войти в личный кабинет</a>
+        {% endif %}
+    </section>
+{% endblock %}

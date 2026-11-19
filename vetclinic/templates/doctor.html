@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+{% block content %}
+    <h1>
+    {% if tab == 'patients' %}
+        Карты пациентов
+    {% elif tab == 'vaccines' %}
+        Вакцинация
+    {% else %}
+        Приём пациента
+    {% endif %}
+    </h1>
+    <p class="subtitle"> Медицинская карта, диагноз и назначения в одном рабочем пространстве. </p>
+    <div class="tabs">
+        <a class="tab" href="{% url 'doctor' %}"> Мои приёмы </a>
+        <a class="tab" href="{% url 'doctor' %}?tab=patients"> Карты пациентов </a>
+        <a class="tab" href="{% url 'doctor' %}?tab=vaccines"> Вакцинация </a>
+    </div>
+    {% if tab == 'patients' %}
+        <section class="card">
+            <h2> Пациенты </h2>
+            {% for pet in patients %}
+                <p> <a href="{% url 'pet_detail' pet.pk %}"> {{ pet.name }} · {{ pet.species }} · {{ pet.owner }} </a> </p>
+            {% empty %}
+                <p> Пациентов пока нет. </p>
+            {% endfor %}
+        </section>
+    {% elif tab == 'vaccines' %}
+        <section class="card">
+            <h2> Прививки пациентов </h2>
+            {% for pet in patients %}
+                <h3> <a href="{% url 'pet_detail' pet.pk %}"> {{ pet.name }} </a> </h3>
+                {% for shot in pet.vaccination_set.all %}
+                    <p> {{ shot.scheme.label }} · {{ shot.due_date|date:'d.m.Y' }} ·
+                    {% if shot.done_date %}
+                        Выполнена
+                    {% elif shot.overdue_days %}
+                        Просрочена на {{ shot.overdue_days }} дн.
+                    {% else %}
+                        Запланирована
+                    {% endif %}
+                    </p>
+                {% endfor %}
+            {% endfor %}
+        </section>
+    {% else %}
+        <div class="layout">
+            <div>
+                <section class="card">
+                    <h2> Мои приёмы </h2>
+                    {% for item in appointments %}
+                        <a class="visit" href="{% url 'doctor_appointment' item.pk %}"> {{ item.date|date:'d.m.Y' }} · {{ item.time|time:'H:i' }} · {{ item.pet }} · {{ item.status }} </a>
+                    {% endfor %}
+                </section>
+                {% if appt %}
+                    <section class="card">
+                        <h2> {{ appt.pet }} · {{ appt.pet.species }} · {{ appt.pet.age }} </h2>
+                        <p> {{ appt.pet.breed }} · {{ appt.pet.sex }} · Дата рождения: {{ appt.pet.birth_date|date:'d.m.Y' }} </p>
+                        <p> Владелец: {{ appt.pet.owner }} · {{ appt.pet.owner.phone }} </p>
+                        <a href="{% url 'pet_detail' appt.pet.pk %}"> Открыть карту пациента </a>
+                    </section>
+                    <section class="card">
+                        <div class="split">
+                            <h2> Протокол приёма </h2>
+                            <span class="blue"> {{ appt.status }} </span>
+                        </div>
+                        {% if appt.status != 'Завершён' %}
+                            <form method="post">
+                                {% csrf_token %} <label> Жалобы / цель обращения <textarea name="complaint"> {{ appt.complaint }} </textarea> </label>
+                                <label> Диагноз / заключение <textarea name="diagnosis"> {{ appt.diagnosis.text|default:'' }} </textarea> </label>
+                                <label> Назначения <textarea name="treatment"> {{ treatment.text|default:'' }} </textarea> </label>
+                                <button class="btn" name="action" value="save"> Сохранить черновик </button>
+                            </form>
+                        {% else %}
+                            <p> Диагноз: {{ appt.diagnosis.text }} </p>
+                            <p> Назначения: {{ treatment.text }} </p>
+                        {% endif %}
+                    </section>
+                {% endif %}
+            </div>
+            <aside class="card">
+                {% if appt %}
+                    <h2> Вакцинация </h2>
+                    {% for shot in shots %}
+                        <div class="danger">
+                            <b> {{ shot.scheme.vaccine.disease }} · срок {{ shot.due_date|date:'d.m.Y' }} </b>
+                            <p> Просрочено {{ shot.overdue_days }} дн. · пока не выполнена </p>
+                        </div>
+                        {% if appt.status != 'Завершён' %}
+                            <form method="post">
+                                {% csrf_token %} <input type="hidden" name="action" value="shot">
+                                <input type="hidden" name="shot" value="{{ shot.pk }}">
+                                <label> Дата введения <input type="date" name="done_date" value="{{ today|date:'Y-m-d' }}"> </label>
+                                <label> Серия вакцины <input name="batch" placeholder="Укажите серию вакцины" required> </label>
+                                <button class="btn full"> Отметить прививку выполненной </button>
+                            </form>
+                        {% endif %}
+                    {% empty %}
+                        <p> Невыполненных прививок нет. </p>
+                    {% endfor %}
+                    {% if appt.status != 'Завершён' %}
+                        <hr>
+                        <form method="post">
+                            {% csrf_token %} <button class="btn full" name="action" value="complete"> Завершить приём </button>
+                        </form>
+                    {% endif %}
+                {% endif %}
+            </aside>
+        </div>
+    {% endif %}
+{% endblock %}

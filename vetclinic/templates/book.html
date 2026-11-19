@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block content %}
+    <h1> Запись на приём </h1>
+    <p class="subtitle"> Врач, услуга и удобное время - без звонка в клинику. </p>
+    <div class="layout">
+        <section class="card bordered">
+            <h2> Запись на приём </h2>
+            <p> Выберите врача и удобное время </p>
+            <form method="post" id="booking">
+                {% csrf_token %} <label> Питомец <select name="pet" id="pet">
+                {% for p in pets %}
+                    <option value="{{ p.pk }}" {% if request.GET.pet == p.pk|stringformat:'s' %}selected{% endif %}> {{ p }} · {{ p.species }} </option>
+                {% endfor %}
+                </select> </label>
+                <label> Услуга <select name="service" id="service"> <option> Бешенство (Rabies) + осмотр </option> <option> Контрольный осмотр </option> <option> Санация полости рта </option> </select> </label>
+                <label> Ветеринарный врач <select name="doctor" id="doctor">
+                {% for d in doctors %}
+                    <option value="{{ d.pk }}"> {{ d }} · {{ d.specialty }} </option>
+                {% endfor %}
+                </select> </label>
+                <label> Дата приёма <input type="date" name="date" id="date" min="{{ today|date:'Y-m-d' }}" value="{{ today|date:'Y-m-d' }}" required> </label>
+                <label> Свободное время <select name="time" id="time" required> <option> 09:00 </option> <option> 10:00 </option> <option> 11:00 </option> <option> 14:00 </option> <option> 15:30 </option> <option> 17:00 </option> </select> </label>
+                <p id="slot-note" class="small"> </p>
+                <button class="btn full"> Подтвердить запись · 1 200 ₽ </button>
+            </form>
+        </section>
+        <div>
+            <section class="card">
+                <h2> Ваша запись </h2>
+                <div id="preview">
+                </div>
+            </section>
+            <div class="card alert danger">
+                <h3> Проверьте график прививок питомца </h3>
+                <p> Просроченные прививки отображаются в карточке и напоминаниях владельца. </p>
+            </div>
+        </div>
+    </div>
+    <script>
+        const form=document.getElementById('booking');async function updateBooking(){let doctor=document.getElementById('doctor'),day=document.getElementById('date'),time=document.getElementById('time');let data=await fetch('?slots=1&doctor='+doctor.value+'&date='+day.value).then(r=>r.json());for(let option of time.options){option.disabled=data.busy.includes(option.value)}if(time.selectedOptions[0]?.disabled)time.value=[...time.options].find(o=>!o.disabled)?.value||'';document.getElementById('slot-note').textContent=time.value?'Занятые часы скрыты из выбора.':'На эту дату свободных часов нет.';document.getElementById('preview').innerHTML='<p>Питомец: '+document.getElementById('pet').selectedOptions[0].textContent+'</p><p>Услуга: '+document.getElementById('service').value+'</p><p>Врач: '+doctor.selectedOptions[0].textContent+'</p><p>Дата и время: '+day.value+' '+time.value+'</p><b class="blue">Оплата в клинике: 1 200 ₽</b>'}form.addEventListener('change',updateBooking);updateBooking()
+    </script>
+{% endblock %}

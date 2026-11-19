@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block content %}
+    <h1>Услуги и стоимость</h1>
+    <p class="subtitle">От профилактики до лечения - помощь на каждом этапе жизни питомца.</p>
+    <section class="cards3 service-list">
+        <article class="card service-card">
+            <h2>Терапия и диагностика</h2>
+            <p>Осмотр, анализы и индивидуальный план лечения.</p>
+            <strong class="price">от 900 ₽</strong>
+            <p class="service-details">Первичный осмотр<br>Лабораторная диагностика<br>План лечения и рекомендации</p>
+            <a class="btn full" href="{% url 'book' %}">Записаться на приём</a>
+        </article>
+        <article class="card service-card">
+            <h2>Вакцинация и ветпаспорт</h2>
+            <p>График по виду и возрасту питомца. Напоминания о сроках вакцинации.</p>
+            <strong class="price">от 1 200 ₽</strong>
+            <p class="service-details">Осмотр перед вакцинацией<br>Персональный график прививок<br>Отметки в ветеринарном паспорте</p>
+            <a class="btn full" href="{% url 'book' %}">Записаться на приём</a>
+        </article>
+        <article class="card service-card">
+            <h2>Хирургия и стационар</h2>
+            <p>Плановые операции и наблюдение после лечения.</p>
+            <strong class="price">от 2 500 ₽</strong>
+            <p class="service-details">Консультация хирурга<br>Плановое оперативное лечение<br>Послеоперационное наблюдение</p>
+            <a class="btn full" href="{% url 'book' %}">Записаться на приём</a>
+        </article>
+    </section>
+    <section class="layout service-bottom">
+        <article class="card info">
+            <h2>Подготовьтесь к приёму</h2>
+            <p>Возьмите ветеринарный паспорт и результаты предыдущих исследований. Подготовку к анализам или операции заранее уточните в клинике.</p>
+        </article>
+        <article class="card">
+            <h2>Поможем выбрать услугу</h2>
+            <strong class="phone">+7 (495) 123-45-67</strong>
+            <p>Ежедневно 08:00-21:00<br>Итоговая стоимость зависит от назначений врача.</p>
+        </article>
+    </section>
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block content %}
+    <h1> Детали записи </h1>
+    <p class="subtitle"> Запись на приём и изменение времени посещения. </p>
+    <div class="layout">
+        <section class="card">
+            <h2> {{ appt.pet }} · {{ appt.service }} </h2>
+            <p> Врач: <b> {{ appt.doctor }} </b> </p>
+            <p> Дата и время: <b> {{ appt.date|date:'d.m.Y' }} , {{ appt.time|time:'H:i' }} </b> </p>
+            <p> Кабинет {{ appt.doctor.room }} · ул. Ветеринарная, 12 </p>
+            <span class="badge {% if appt.status == 'Отменён' %}danger{% elif appt.status == 'Завершён' %}good{% else %}info{% endif %}"> {{ appt.status }} </span>
+        </section>
+        <aside class="card">
+            <h3> Действия </h3>
+            {% if role == 'admin' and appt.status == 'Ожидает' %}
+                <form method="post">
+                    {% csrf_token %} 
+                    <button class="btn full" name="action" value="confirm"> Подтвердить запись </button>
+                </form>
+            {% endif %}
+            {% if appt.status != 'Отменён' and appt.status != 'Завершён' %}
+                <form method="post">
+                    {% csrf_token %} <input type="hidden" name="action" value="move">
+                    <label> Новая дата <input type="date" name="date" required> </label>
+                    <label> Новое время <input type="time" name="time" required> </label>
+                    <button class="btn full"> Перенести запись </button>
+                </form>
+                <form method="post" class="mt">
+                    {% csrf_token %} <input type="hidden" name="action" value="cancel">
+                    <button class="btn red full"> Отменить запись </button>
+                </form>
+            {% endif %}
+        </aside>
+    </div>
+{% endblock %}

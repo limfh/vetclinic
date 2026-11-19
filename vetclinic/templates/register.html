@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block content %}
+    <h1>Регистрация владельца</h1>
+    <p class="subtitle">Создайте личный кабинет, чтобы добавить питомцев и записываться на приём.</p>
+    <div class="layout loginlayout">
+        <section class="card roomy">
+            <h2>Данные владельца</h2>
+            <form method="post">
+                {% csrf_token %}
+                <label>Имя<input name="first_name" maxlength="150" value="{{ request.POST.first_name }}" required></label>
+                <label>Фамилия<input name="last_name" maxlength="150" value="{{ request.POST.last_name }}" required></label>
+                <label>Телефон<input type="tel" name="phone" maxlength="30" value="{{ request.POST.phone }}" required></label>
+                <label>Логин<input name="username" maxlength="150" value="{{ request.POST.username }}" autocomplete="username" required></label>
+                <label>Пароль<input type="password" name="password" autocomplete="new-password" required></label>
+                <label>Повторите пароль<input type="password" name="password_repeat" autocomplete="new-password" required></label>
+                <p class="small">Используйте надёжный пароль длиной не менее 8 символов.</p>
+                <button class="btn full" type="submit">Зарегистрироваться</button>
+            </form>
+            <p>Уже есть аккаунт? <a href="{% url 'login' %}">Войти</a></p>
+        </section>
+        <section class="card info">
+            <h2>Личный кабинет владельца</h2>
+            <p>После регистрации можно добавить питомцев, посмотреть график прививок и записаться к врачу.</p>
+            <p>Сотрудники клиники входят по заранее созданным учётным записям.</p>
+        </section>
+    </div>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block content %}
+    <h1> Вход в личный кабинет </h1>
+    <p class="subtitle"> Один вход для владельцев питомцев и сотрудников клиники. </p>
+    <div class="layout loginlayout">
+        <section class="hero column">
+            <h2> Забота, которую <br> легко организовать </h2>
+            <p> Всё важное о здоровье питомца <br> всегда под рукой. </p>
+            <div class="benefit">
+                <b> 01 </b>
+                <span> <strong> Карточки питомцев </strong> <p> Вид, возраст и медицинские данные. </p> </span>
+            </div>
+            <div class="benefit">
+                <b> 02 </b>
+                <span> <strong> Прививки без пропусков </strong> <p> Автоматический график и напоминания. </p> </span>
+            </div>
+            <div class="benefit">
+                <b> 03 </b>
+                <span> <strong> Вся история лечения </strong> <p> Диагнозы и назначения вашего врача. </p> </span>
+            </div>
+        </section>
+        <section class="card roomy">
+            <div class="tabs">
+                <button class="btn" type="button" onclick="selectRole(this,'owner')"> Владелец питомца </button>
+                <button class="tab" type="button" onclick="selectRole(this,'staff')"> Сотрудник клиники </button>
+            </div>
+            <h2> Войти в личный кабинет </h2>
+            <p> Используйте логин и пароль вашей учётной записи. </p>
+            <form method="post">
+                {% csrf_token %} <label> Логин <input name="username" required autocomplete="username"> </label>
+                <label> Пароль <input name="password" type="password" required autocomplete="current-password"> </label>
+                <button class="btn full"> Войти </button>
+            </form>
+            <p>Нет аккаунта? <a href="{% url 'register' %}">Зарегистрироваться как владелец</a></p>
+            <p class="small"> Тестовый владелец: user / 123 </p>
+            <p class="small"> Вход врача и администратора - по рабочему логину. Права определяются учётной записью. </p>
+        </section>
+    </div>
+    <script>
+        function selectRole(el, role) {document.querySelectorAll('.tabs button').forEach(x => x.className = 'tab'); el.className = 'btn';}
+    </script>
+{% endblock %}

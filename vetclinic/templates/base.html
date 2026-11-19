@@ -1,0 +1,71 @@
+{% load static %} 
+<!doctype html>
+<html lang="ru">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <title> ВетЗабота </title>
+        <link rel="stylesheet" href="{% static 'style.css' %}">
+    </head>
+    <body>
+        <header>
+            <div class="bar">
+                <a class="brand" href="{% url 'home' %}"> <b> В </b> <span> <strong> ВетЗабота </strong> <small> ветеринарная клиника </small> </span> </a>
+                <nav>
+                    {% if role == 'owner' %}
+                        <a href="{% url 'pets' %}">Питомцы</a>
+                        <a href="{% url 'vaccinations' %}">Прививки</a>
+                        <a href="{% url 'reminders' %}">Напоминания</a>
+                        <a href="{% url 'history' %}">История</a>
+                        <a href="{% url 'book' %}">Запись</a>
+                    {% elif role == 'doctor' %}
+                        <a href="{% url 'doctor' %}">Мои приёмы</a>
+                        <a href="{% url 'doctor' %}?tab=patients">Карты пациентов</a>
+                        <a href="{% url 'doctor' %}?tab=vaccines">Вакцинация</a>
+                    {% elif role == 'admin' %}
+                        <a href="{% url 'clinic' %}">Журнал записей</a>
+                        <a href="{% url 'clinic' %}?tab=schedule">Расписание</a>
+                        <a href="{% url 'clinic' %}?tab=owners">Владельцы</a>
+                        <a href="{% url 'clinic' %}?tab=reference">Справочники</a>
+                    {% else %}
+                        <a class="{% if active == 'home' %}active{% endif %}" href="{% url 'home' %}">О клинике</a>
+                        <a class="{% if active == 'services' %}active{% endif %}" href="{% url 'services' %}">Услуги</a>
+                        <a class="{% if active == 'doctors' %}active{% endif %}" href="{% url 'doctors' %}">Врачи</a>
+                        <a class="{% if active == 'contacts' %}active{% endif %}" href="{% url 'contacts' %}">Контакты</a>
+                    {% endif %}
+                </nav>
+                <span class="role">
+                {% if role == 'owner' %}
+                    Владелец
+                {% elif role == 'doctor' %}
+                    Врач
+                {% elif role == 'admin' %}
+                    Администратор
+                {% else %}
+                    Гость
+                {% endif %}
+                </span>
+                {% if user.is_authenticated %}
+                    <form method="post" action="{% url 'logout' %}">
+                        {% csrf_token %} <button class="logout" title="Выйти"> {{ user.get_full_name|default:user.username }} · Выйти </button>
+                    </form>
+                {% else %}
+                    <a class="login" href="{% url 'login' %}"> Войти → </a>
+                {% endif %}
+            </div>
+        </header>
+        <main>
+            {% for message in messages %}
+                <div class="notice">
+                    {{ message }}
+                </div>
+            {% endfor %}
+            {% block content %}
+            {% endblock %}
+        </main>
+        <footer>
+            <span> © 2026 ВетЗабота </span>
+            <span> Ежедневно 08:00-21:00 · +7 (495) 123-45-67 </span>
+        </footer>
+    </body>
+</html>

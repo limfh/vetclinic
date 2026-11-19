@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block content %}
+    <h1> Напоминания владельцу </h1>
+    <p class="subtitle"> Не пропускайте вакцинации и запланированные приёмы. </p>
+    <div class="layout">
+        <div>
+            <div class="tabs">
+                <a class="btn" href="{% url 'reminders' %}"> Все · {{ shots|length }} </a>
+                <a class="tab danger" href="{% url 'reminders' %}?filter=overdue"> Просроченные · {{ overdue|length }} </a>
+                <a class="tab" href="{% url 'reminders' %}?filter=upcoming"> Предстоящие · {{ upcoming_shots|length }} </a>
+            </div>
+            {% if selected != 'upcoming' %}
+                {% for shot in overdue %}
+                    <div class="card alert danger">
+                        <small> ПРОСРОЧЕНО · {{ shot.overdue_days }} ДНЕЙ </small>
+                        <h2> {{ shot.pet }} · {{ shot.scheme.vaccine.disease }} </h2>
+                        <p> Плановая дата: {{ shot.due_date|date:'d.m.Y' }} . Сформировано из графика прививок. </p>
+                        <a class="btn red" href="{% url 'book' %}"> Записаться на прививку </a>
+                    </div>
+                {% endfor %}
+            {% endif %}
+            {% if selected != 'overdue' %}
+                {% for appt in appointments %}
+                    <div class="card">
+                        <small class="blue"> ЧЕРЕЗ {{ appt.date|timeuntil }} </small>
+                        <h2> {{ appt.pet }} · контрольный осмотр </h2>
+                        <p> {{ appt.date|date:'d.m.Y' }} , {{ appt.time|time:'H:i' }} · {{ appt.doctor }} · кабинет {{ appt.doctor.room }} </p>
+                        <a class="btn" href="{% url 'appointment_detail' appt.pk %}"> Открыть запись </a>
+                    </div>
+                {% endfor %}
+                {% for shot in upcoming_shots %}
+                    <div class="card">
+                        <small class="blue"> ПРЕДСТОИТ </small>
+                        <h2> {{ shot.pet }} · {{ shot.scheme.vaccine.disease }} </h2>
+                        <p> {{ shot.due_date|date:'d.m.Y' }} </p>
+                        <a class="btn" href="{% url 'book' %}"> Записаться </a>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+        <aside>
+            <div class="card">
+                <h2> Куда напоминать </h2>
+                <h3> Личный кабинет </h3>
+                <p class="green"> Всегда включено </p>
+                <h3> SMS-уведомления </h3>
+                <p> Отправка SMS в учебной версии не подключена · {{ owner.phone }} </p>
+                <form method="post">
+                    {% csrf_token %} <label> Срок напоминания о прививке <select name="days"> <option value="14"> За 14 дней до даты </option> <option value="7"> За 7 дней до даты </option> <option value="30"> За 30 дней до даты </option> </select> </label>
+                    <button class="btn full"> Сохранить настройки </button>
+                </form>
+            </div>
+            <div class="card info">
+                <h3> Карточка и напоминания связаны </h3>
+                <p> Одна и та же просроченная прививка отображается в обоих разделах. </p>
+            </div>
+        </aside>
+    </div>
+{% endblock %}
