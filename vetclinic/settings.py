@@ -125,3 +125,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 STATICFILES_DIRS = [BASE_DIR / 'vetclinic' / 'static']
 LOGIN_URL = 'login'
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'testserver']
+STATIC_ROOT = BASE_DIR / 'static'
+
